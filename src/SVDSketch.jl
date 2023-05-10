@@ -5,7 +5,10 @@ export svdsketch
 using LinearAlgebra: BlasFloat, eigen, SVD, tr
 using ElasticArrays
 
-function eigSVD(A, tol)
+eps(T) = Base.eps(T)
+eps(::Type{Complex{T}}) where {T} = eps(T)
+
+function eigSVD(A)
     transposed = false
     if size(A, 1) < size(A, 2)
         A = A'
@@ -17,9 +20,9 @@ function eigSVD(A, tol)
     D = real(D)
 
     # Eliminate negative & very small eigenvalues
-    idx = searchsortedfirst(D, tol^2)
+    idx = searchsortedfirst(D, eps(eltype(A))^(1/2))
     if idx > length(D)
-        error("SVDSketch: Could not find eigenvalue for eigSVD. Your `tol` may be set too high.")
+        error("SVDSketch: Could not find eigenvalue for eigSVD. Your `tol` may be too small.")
     end
 
     D, V = D[idx:end], V[:, idx:end]
@@ -32,9 +35,6 @@ function eigSVD(A, tol)
         return U, S, V
     end
 end
-
-eps(T) = Base.eps(T)
-eps(::Type{Complex{T}}) where {T} = eps(T)
 
 @doc raw"""
     svdsketch(A[, tol]; [maxrank, blocksize, maxiter, poweriter]) -> (U, S, Vt, apxerror)
@@ -115,7 +115,7 @@ function _svdsketch(A, tol;
             else
                 w = A' * (A * w) - alpha * w
             end
-            w, ss, = eigSVD(w, tol)
+            w, ss, = eigSVD(w)
             if j > 1 && ss[1] > alpha
                 alpha = (alpha + ss[1]) / 2
             end
