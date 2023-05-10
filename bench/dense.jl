@@ -1,12 +1,12 @@
 using BenchmarkTools
-using .SVDSketch
+using SVDSketch
 using Images
 using Arpack
 using LinearAlgebra
 
 function readimage()
     # Read image
-    img = Array{Float64}(channelview(load("bench/image1.jpg")))
+    img = Array{Float64}(channelview(load("image1.jpg")))
     p, m, n = size(img)
     A = m > n ? [img[1, :, :] img[2, :, :] img[3, :, :]] : [img[1, :, :]; img[2, :, :]; img[3, :, :]]
     return A

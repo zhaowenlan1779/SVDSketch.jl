@@ -1,6 +1,6 @@
 using MKLSparse
 using BenchmarkTools
-using .SVDSketch
+using SVDSketch
 using Arpack
 using LinearAlgebra
 using SparseArrays
@@ -11,7 +11,7 @@ function readmatrix()
     I = Vector{Int64}(undef, cnt)
     J = Vector{Int64}(undef, cnt)
     V = Vector{Float64}(undef, cnt)
-    open("bench/SNAP.dat", "r") do io
+    open("SNAP.dat", "r") do io
         for i=1:cnt
             r, I[i], J[i], V[i] = @scanf(io, "%d %d %lf", Int64, Int64, Float64)
         end
