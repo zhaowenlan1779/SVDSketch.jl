@@ -82,31 +82,15 @@ end
 
         A = U*Diagonal(S)*V'
 
-        @testset "blocksize default" begin
-            U, S, Vt, = svdsketch(A)
-
-            @test size(S, 1) == r
-            @test S[1:r] ≈ S
-            @test U'*U ≈ Matrix{Float64}(I, r, r)
-            @test Vt*Vt' ≈ Matrix{Float64}(I, r, r)
-        end
-
-        @testset "blocksize r-1" begin
-            U, S, Vt, = svdsketch(A, blocksize=r-1)
-
-            @test size(S, 1) == r
-            @test S[1:r] ≈ S
-            @test U'*U ≈ Matrix{Float64}(I, r, r)
-            @test Vt*Vt' ≈ Matrix{Float64}(I, r, r)
-        end
-
-        @testset "blocksize r+1" begin
-            U, S, Vt, = svdsketch(A, blocksize=r+1)
-
-            @test size(S, 1) == r
-            @test S[1:r] ≈ S
-            @test U'*U ≈ Matrix{Float64}(I, r, r)
-            @test Vt*Vt' ≈ Matrix{Float64}(I, r, r)
+        @testset "blocksize $b" for b in [nothing, r-1, r+1]
+            @testset "tol $t" for t in [eps(Float64)^(1/4), eps(Float64)^(1/3), 0.01]
+                U, S, Vt, = isnothing(b) ? svdsketch(A, t) : svdsketch(A, t, blocksize=b)
+                
+                @test size(S, 1) == r
+                @test S[1:r] ≈ S
+                @test U'*U ≈ Matrix{Float64}(I, r, r)
+                @test Vt*Vt' ≈ Matrix{Float64}(I, r, r)
+            end
         end
     end
 end

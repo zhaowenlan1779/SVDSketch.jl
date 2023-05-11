@@ -1,4 +1,6 @@
+# Note: MKL must be imported after MKLSparse. There's an issue about this in MKLSparse's repo.
 using MKLSparse
+using MKL
 using BenchmarkTools
 using SVDSketch
 using Arpack
