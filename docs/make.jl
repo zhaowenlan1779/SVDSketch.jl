@@ -2,4 +2,13 @@ push!(LOAD_PATH, "../src/")
 
 using Documenter, SVDSketch
 
-makedocs(sitename="SVDSketch.jl")
+makedocs(
+    format = Documenter.HTML(
+        canonical = "https://zhaowenlan1779.github.io/SVDSketch.jl/stable/",
+    ),
+    sitename="SVDSketch.jl"
+)
+
+deploydocs(
+    repo = "github.com/zhaowenlan1779/SVDSketch.jl.git",
+)

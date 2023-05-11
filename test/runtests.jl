@@ -82,10 +82,10 @@ end
 
         A = U*Diagonal(S)*V'
 
-        @testset "blocksize $b" for b in [nothing, r-1, r+1]
+        @testset "blocksize $b" for b in [0, r-1, r+1]
             @testset "tol $t" for t in [eps(Float64)^(1/4), eps(Float64)^(1/3), 0.01]
-                U, S, Vt, = isnothing(b) ? svdsketch(A, t) : svdsketch(A, t, blocksize=b)
-                
+                U, S, Vt, = b == 0 ? svdsketch(A, t) : svdsketch(A, t, blocksize=b)
+
                 @test size(S, 1) == r
                 @test S[1:r] ≈ S
                 @test U'*U ≈ Matrix{Float64}(I, r, r)
