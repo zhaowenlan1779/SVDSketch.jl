@@ -4,7 +4,7 @@ using Documenter, SVDSketch
 
 makedocs(
     format = Documenter.HTML(
-        canonical = "https://zhaowenlan1779.github.io/SVDSketch.jl/stable/",
+        canonical = "https://blog.zhupengfei.com.cn/SVDSketch.jl/stable/",
     ),
     sitename="SVDSketch.jl"
 )
