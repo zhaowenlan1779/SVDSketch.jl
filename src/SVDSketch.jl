@@ -2,8 +2,9 @@ module SVDSketch
 
 export svdsketch
 
-using LinearAlgebra: BlasFloat, eigen, SVD, tr
+using LinearAlgebra: BlasFloat, Hermitian, eigen!, SVD, tr, mul!, BLAS
 using ElasticArrays
+using Random: randn!
 
 eps(T) = Base.eps(T)
 eps(::Type{Complex{T}}) where {T} = eps(T)
@@ -15,8 +16,7 @@ function eigSVD(A)
         transposed = true
     end
 
-    B = A' * A;
-    D, V = eigen(B)
+    D, V = eigen!(Hermitian(A' * A))
     D = real(D)
 
     # Eliminate negative & very small eigenvalues
@@ -102,18 +102,24 @@ function _svdsketch(A, tol;
 
     WTW = Matrix{eltype(A)}(undef, 0, 0)
 
+    w = Matrix{eltype(A)}(undef, n, blocksize)
+    y = Matrix{eltype(A)}(undef, m, blocksize)
+
     apxerror = Vector{Float64}(undef, maxiter)
     # oldblocksize = blocksize
     sizeB = 0
     for i = 1:maxiter
-        w = randn(n, blocksize)
+        randn!(w)
 
         alpha = 0
         for j = 1:poweriter
+            mul!(y, A, w)
             if i > 1
-                w = A' * (A * w) - W * (Z \ (W' * w)) - alpha * w
+                x = Z \ (W' * w)
+                mul!(w, A', y, 1, -alpha)
+                mul!(w, W, x, -1, 1)
             else
-                w = A' * (A * w) - alpha * w
+                mul!(w, A', y, 1, -alpha)
             end
             w, ss, = eigSVD(w)
             if j > 1 && ss[1] > alpha
@@ -121,8 +127,13 @@ function _svdsketch(A, tol;
             end
         end
 
-        y = A * w
-        w = A' * y
+        if size(w, 2) == blocksize
+            mul!(y, A, w)
+            mul!(w, A', y)
+        else # eigSVD exited early
+            y = A * w
+            w = A' * y
+        end
         if i > 1
             ytYtemp = y' * Y
             Z = [Z ytYtemp'; ytYtemp y'*y]
@@ -137,7 +148,7 @@ function _svdsketch(A, tol;
         append!(W, w)
         sizeB += blocksize
 
-        apxerror[i] = sqrt(max(1 - real(tr(Z\WTW)) / normA, 0))
+        apxerror[i] = sqrt(max(1 - real(tr(Hermitian(Z) \ Hermitian(WTW))) / normA, 0))
         if apxerror[i] < tol || sizeB >= maxrank
             apxerror = apxerror[1:i]
             break
@@ -151,17 +162,21 @@ function _svdsketch(A, tol;
         if sizeB + blocksize > maxrank
             blocksize = maxrank - sizeB
         end
+
+        if size(w, 2) != blocksize
+            break
+        end
     end
 
-    D, V = eigen((Z + Z') / 2)
+    D, V = eigen!(Hermitian(Z))
     d = sqrt.(D)
     VS = V ./ d'
-    C = VS' * WTW * VS
-    C = (C + C') / 2 
-    D2, V2 = eigen(C, sortby=λ->-abs(λ))
+    mul!(V, Hermitian(WTW), VS)
+    mul!(WTW, VS', V)
+    D2, V2 = eigen!(Hermitian(WTW), sortby=λ->-abs(λ))
     d = sqrt.(D2)
     VS *= V2
-    Y = Y * VS
+    Y *= VS
     W = W * VS ./ d'
     return Y, d, W', apxerror
 end
