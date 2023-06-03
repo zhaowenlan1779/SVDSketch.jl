@@ -111,7 +111,7 @@ function _svdsketch(A, tol;
     for i = 1:maxiter
         randn!(w)
 
-        alpha = 0
+        alpha = 0.0
         for j = 1:poweriter
             mul!(y, A, w)
             if i > 1
