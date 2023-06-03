@@ -37,7 +37,7 @@ function eigSVD(A)
 end
 
 @doc raw"""
-    svdsketch(A[, tol]; [maxrank, blocksize, maxiter, poweriter]) -> (U, S, Vt, apxerror)
+    svdsketch(A[, tol]; [maxrank, blocksize, maxiter, poweriter]) -> (U, S, V, apxerror)
 
 Returns the singular value decomposition (SVD) of a low-rank matrix sketch of ``A``.
 The matrix sketch only reflects the most important features of ``A`` (up to a tolerance),
@@ -178,7 +178,7 @@ function _svdsketch(A, tol;
     VS *= V2
     Y *= VS
     W = W * VS ./ d'
-    return Y, d, W', apxerror
+    return Y, d, W, apxerror
 end
 
 end

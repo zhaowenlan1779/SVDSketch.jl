@@ -18,10 +18,10 @@ end
 
     @testset "real" begin
         A = rand(rng, 1:10, 10, 10) # Integer matrix, tests promotion as well
-        U, S, Vt, = svdsketch(A)
+        U, S, V, = svdsketch(A)
         r2 = svd(A)
 
-        testSVDMatch(SVD(U, S, Vt), r2)
+        testSVDMatch(SVD(U, S, V'), r2)
         @test_throws ArgumentError svdsketch(A, blocksize=100)
     end
 
@@ -34,10 +34,10 @@ end
 
     @testset "complex" begin
         A = rand(rng, 1:10, 10, 10) + rand(rng, 1:10, 10, 10) * im
-        U, S, Vt, = svdsketch(A)
+        U, S, V, = svdsketch(A)
         r2 = svd(A)
 
-        testSVDMatch(SVD(U, S, Vt), r2)
+        testSVDMatch(SVD(U, S, V'), r2)
         @test_throws ArgumentError svdsketch(A, blocksize=100)
     end
 end
@@ -46,10 +46,10 @@ end
 @testset "sparse" begin
     @testset "real" begin
         A = sparse([1, 1, 2, 3, 4], [2, 1, 1, 3, 1], [2.0, -1.0, 6.1, 7.0, 1.5])
-        U, S, Vt, = svdsketch(A)
+        U, S, V, = svdsketch(A)
         r2 = svd(Array(A))
 
-        testSVDMatch(SVD(U, S, Vt), r2)
+        testSVDMatch(SVD(U, S, V'), r2)
         @test_throws ArgumentError svdsketch(A, blocksize=100)
     end
 
@@ -62,10 +62,10 @@ end
 
     @testset "complex" begin
         A = sparse([1, 1, 2, 3, 4], [2, 1, 1, 3, 1], exp.(im*[2.0:2:10;]), 5, 4)
-        U, S, Vt, = svdsketch(A, blocksize=1)
+        U, S, V, = svdsketch(A, blocksize=1)
         r2 = svd(Array(A))
 
-        testSVDMatch(SVD(U, S, Vt), r2)
+        testSVDMatch(SVD(U, S, V'), r2)
     end
 end
 
@@ -84,12 +84,12 @@ end
 
         @testset "blocksize $b" for b in [0, r-1, r+1]
             @testset "tol $t" for t in [eps(Float64)^(1/4), eps(Float64)^(1/3), 0.01]
-                U, S, Vt, = b == 0 ? svdsketch(A, t) : svdsketch(A, t, blocksize=b)
+                U, S, V, = b == 0 ? svdsketch(A, t) : svdsketch(A, t, blocksize=b)
 
                 @test size(S, 1) == r
                 @test S[1:r] ≈ S
                 @test U'*U ≈ Matrix{Float64}(I, r, r)
-                @test Vt*Vt' ≈ Matrix{Float64}(I, r, r)
+                @test V'*V ≈ Matrix{Float64}(I, r, r)
             end
         end
     end

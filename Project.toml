@@ -1,7 +1,7 @@
 name = "SVDSketch"
 uuid = "f2712ddf-d375-4b75-9475-5f3be79dfb12"
 authors = ["Xu Feng", "Wenjian Yu", "Pengfei Zhu"]
-version = "0.1.1"
+version = "0.2.0"
 
 [deps]
 ElasticArrays = "fdbdab4c-e67f-52f5-8c3f-e7b388dad3d4"
